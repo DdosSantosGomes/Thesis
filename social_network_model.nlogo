@@ -4,10 +4,12 @@ undirected-link-breed [ friendships friendship ]
 undirected-link-breed [ acquaintanceships acquaintanceship ]
 
 turtles-own [
+  ; Extend this list of variables in case of more positions
   p
   q
   r
 
+  ; Extend this list in case of more positions
   p2
   q2
   r2
@@ -163,7 +165,8 @@ to generate-network
     ])
 end
 
-; Assigns positions regarding p, q, r to agents
+; Assigns positions regarding p, q, r to agents (extend in case of more positions)
+; Extend in case of more positions
 to set-positions
   ask turtles [
     set p random 2
@@ -224,6 +227,7 @@ end
 
 ; Updates relation between two agents given distance
 to update-relation [ agent1 agent2 ]
+  ; Extend in case of more positions
   let list1 (list [p] of agent1 [q] of agent1 [r] of agent1)
   let list2 (list [p] of agent2 [q] of agent2 [r] of agent2)
   let d dist list1 list2
@@ -300,6 +304,8 @@ to get-r2 [ agent relations ]
   ]
 end
 
+; Write extra functions of the form get-r2 in case of more positions
+
 ; Stores simultaneously updated positions of agent in p2, q2, r2 given relations
 ; Is also used during influencer identification
 to get-updated-positions-agent [ agent relations ]
@@ -309,12 +315,14 @@ to get-updated-positions-agent [ agent relations ]
     ifelse total-relations = 1
 
     ; If turtle has no other neighbors, do not update positions
+    ; Extend in case of more positions
     [ set p2 p
       set q2 q
       set r2 r
     ]
 
     ; Compute new positions
+    ; Extend in case of more positions
     [ get-p2 self relations
       get-q2 self relations
       get-r2 self relations
@@ -334,6 +342,7 @@ to perform-social-influence
   ask turtles [
 
     ; Set positions to updated positions
+    ; Extend in case of more positions
     set p p2
     set q q2
     set r r2
@@ -355,11 +364,15 @@ end
 to check-inf-type [ agent ]
   ask agent [
     (ifelse
+      ; Extend in case of more positions
       ((is-rigid-i p p2) and (is-rigid-i q q2)) and (is-rigid-i r r2) [ ; Rigid influencer
         set rig-influencer rig-influencer + 1
         set flex-influencer flex-influencer + 1
       ]
 
+      ; Extend in case of more positions
+      ; Adapt this line to change the definition of a flexible influencer
+      ; For example, count the number of rigid positions and compare to a threshold
       ((is-rigid-i p p2) or (is-rigid-i q q2)) or (is-rigid-i r r2) [ ; Flexible influencer
         set rig-influencer 0
         set flex-influencer flex-influencer + 1
@@ -380,9 +393,11 @@ to identify-influencers
     ; Compute current ratio, count self as own friend
     let friends-ratio (count turtle-set friendship-neighbors + 1) / (count link-neighbors + 1)
 
+    ; Extend in case of more positions
     let list1 (list p2 q2 r2)
 
     ; Compute future friends and relations given future positions
+    ; Extend in case of more positions
     let next-friends other turtles with [ member? (dist list1 (list p2 q2 r2)) fdist ]
     let next-relations other turtles with [ (member? (dist list1 (list p2 q2 r2)) fdist)
                                      or (member? (dist list1 (list p2 q2 r2)) acdist)
@@ -390,6 +405,8 @@ to identify-influencers
 
     ; Compute next ratio and compare with current ratio
     let next-friends-ratio (count next-friends + 1) / (count next-relations + 1)
+
+    ; Add a second if-else statement here if you want to require that next-relations > link-neighbors
 
     ifelse next-friends-ratio > friends-ratio [ check-inf-type self ] ; Check influencer type
 
@@ -786,7 +803,6 @@ to check-consensus
 end
 
 
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 498
@@ -954,7 +970,7 @@ theta-values:\n- configuration 1 with theta_1 = 1/3, theta_2 = 2/3\n- configurat
 @#$#@#$#@
 ## WHAT IS IT?
 
-This is the implementation of a Social Network Model created to research the development of polarization in relation with homophily and influential nodes. The agents alternately recreate friendship and acquaintanceship relations, and influence each other's opinions. The network runs in NetLogo-6.2.0. A detailed description of the model, its logical implications, and the results of a number of simulations is provided in my bachelor's thesis. 
+This is the implementation of a Social Network Model created to research the development of polarization in relation with homophily and influential nodes. The agents alternately recreate friendship and acquaintanceship relations, and influence each other's opinions. The NetLogo implementation is not supported by NetLogo Web and should therefore be run in the NetLogo application (version 6.2.0). A detailed description of the model, its logical implications, and the results of a number of simulations is provided in my bachelor's thesis. 
 
 ## HOW IT WORKS
 
@@ -963,6 +979,8 @@ The model makes use of two main, threshold-based update rules: friendship select
 ## HOW TO USE IT
 
 The network-type chooser contains several network-types that can be run. Whereas the random network is run with varying numbers of turtles and links, the other structures run with fixed numbers. The influence-threshold determines what proportion of neighbors is required to have some opinion in order to influence an agent, while the theta-values determine the maximum distance between two agents that is required to form a friendship or acquaintanceship, respectively.
+In order to run the network with a larger number of topic positions, extend the global variables p, q, r (and temporary storage variables p2, q2, r2) and extend the following functions to include the newly set variables: set-positions, update-relation, get-updated-positions-agent, perform-social-influence, check-inf-type, identify-influencers, and new functions of the form get-p2. Comments in the code indicate which parts should be extended. Note that topics are not implemented in this model, as we consider only the union of the sets of positions for each topic. 
+In order to run the network with a stricter definition of flexible influencers - for example, to maintain two of the three positions - adapt one line of the check-inf-type function. Comments in the code indicate which part should be adapted. Furthermore, in the identify-influencers function, a comment indicates where an if-else statement should be included to require that an influencer increases his total number of relations within an update. 
 
 ## THINGS TO NOTICE
 
